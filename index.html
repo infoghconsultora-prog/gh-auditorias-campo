@@ -44,14 +44,16 @@ button, input, textarea, select { font: inherit; color: inherit; }
 @keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .screen { animation: none; } * { transition: none !important; } }
 
-.top { display: flex; align-items: center; justify-content: space-between; min-height: 52px; padding-top: 6px; }
+.top { position: sticky; top: 0; z-index: 20; isolation: isolate; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; margin: 0 -16px 4px; padding: 6px 16px;
+  background: color-mix(in srgb, var(--bg) 62%, transparent); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: inset 0 -.5px 0 var(--sep); }
 .top .back { color: var(--accent); background: none; border: 0; padding: 8px 0; font-size: 17px; display: inline-flex; align-items: center; gap: 2px; cursor: pointer; }
 .top .quien { color: var(--label2); font-size: 13px; }
 h1 { font-size: 34px; line-height: 41px; font-weight: 700; letter-spacing: .01em; margin: 4px 0 4px; }
 h2 { font-size: 13px; line-height: 18px; font-weight: 400; text-transform: uppercase; letter-spacing: .02em; color: var(--label2); margin: 24px 16px 6px; }
 .sub { color: var(--label2); font-size: 15px; line-height: 20px; margin: 0 0 16px; }
-.logo { height: 44px; margin: 18px 0 8px; display: block; }
-@media (prefers-color-scheme: dark) { .logo { background: #fff; padding: 6px 12px; border-radius: 12px; box-sizing: content-box; } }
+.logo { height: 64px; width: auto; display: block; margin: 28px auto 18px; }
+.logo-sm { height: 30px; width: auto; display: block; }
 
 .group { background: var(--card); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
 .row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-height: 52px; width: 100%; text-align: left; background: none; border: 0; cursor: pointer; position: relative; }
@@ -121,9 +123,9 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 <!-- ============ Login ============ -->
 <section id="s-login" class="screen">
   <img class="logo" src="logo-gh.png" alt="GH Consultora">
-  <h1>Auditoría de campo</h1>
-  <p class="sub">Entrá con tu cuenta de GH Consultora. Solo hace falta la primera vez: la sesión dura 30 días.</p>
-  <div id="gsi" style="min-height:44px"></div>
+  <h1 class="center">Auditoría de campo</h1>
+  <p class="sub center">Entrá con tu cuenta de GH Consultora. Solo hace falta la primera vez: la sesión dura 30 días.</p>
+  <div id="gsi" style="min-height:44px;display:flex;justify-content:center"></div>
   <div class="err" id="login-err"></div>
   <h2>Si el botón de Google no funciona</h2>
   <div class="group" style="padding:4px 16px 12px">
@@ -135,7 +137,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 
 <!-- ============ Inicio ============ -->
 <section id="s-home" class="screen">
-  <div class="top"><span class="quien" id="h-quien"></span><button class="back" id="h-salir" style="color:var(--label2);font-size:15px">Salir</button></div>
+  <div class="top"><img class="logo-sm" src="logo-gh.png" alt="GH Consultora"><span style="display:flex;align-items:center;gap:14px"><span class="quien" id="h-quien"></span><button class="back" id="h-salir" style="color:var(--label2);font-size:15px">Salir</button></span></div>
   <h1>Auditorías</h1>
   <p class="sub">Cada sector se guarda apenas lo terminás. Si se corta algo, no perdés nada.</p>
   <div id="h-retomar"></div>
