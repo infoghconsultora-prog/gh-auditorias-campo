@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Auditoría">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Auditoría de campo — GH Consultora</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #f2f2f7; --card: #ffffff; --fill: rgba(120,120,128,.12); --sep: rgba(60,60,67,.18);
+  --label: #000; --label2: rgba(60,60,67,.62); --label3: rgba(60,60,67,.38);
+  --accent: #5a9a1f; --accent-ink: #ffffff; --accent-soft: rgba(90,154,31,.14);
+  --red: #ff383c; --orange: #ff8d28; --blue: #0088ff;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.07);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --ease: cubic-bezier(.32,.72,0,1);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000; --card: #1c1c1e; --fill: rgba(120,120,128,.24); --sep: rgba(84,84,88,.55);
+    --label: #fff; --label2: rgba(235,235,245,.62); --label3: rgba(235,235,245,.32);
+    --accent: #7dbd3a; --accent-ink: #0b1a00; --accent-soft: rgba(125,189,58,.2);
+    --red: #ff4245; --orange: #ff9230; --blue: #0091ff;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.4);
+  }
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--label); font: 17px/22px var(--font); -webkit-text-size-adjust: 100%; }
+body { min-height: 100dvh; padding: env(safe-area-inset-top) 0 0; }
+button, input, textarea, select { font: inherit; color: inherit; }
+.screen { display: none; padding: 0 16px calc(120px + env(safe-area-inset-bottom)); max-width: 640px; margin: 0 auto; animation: in .35s var(--ease); }
+.screen.on { display: block; }
+@keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .screen { animation: none; } * { transition: none !important; } }
+
+.top { display: flex; align-items: center; justify-content: space-between; min-height: 52px; padding-top: 6px; }
+.top .back { color: var(--accent); background: none; border: 0; padding: 8px 0; font-size: 17px; display: inline-flex; align-items: center; gap: 2px; cursor: pointer; }
+.top .quien { color: var(--label2); font-size: 13px; }
+h1 { font-size: 34px; line-height: 41px; font-weight: 700; letter-spacing: .01em; margin: 4px 0 4px; }
+h2 { font-size: 13px; line-height: 18px; font-weight: 400; text-transform: uppercase; letter-spacing: .02em; color: var(--label2); margin: 24px 16px 6px; }
+.sub { color: var(--label2); font-size: 15px; line-height: 20px; margin: 0 0 16px; }
+.logo { height: 44px; margin: 18px 0 8px; display: block; }
+@media (prefers-color-scheme: dark) { .logo { background: #fff; padding: 6px 12px; border-radius: 12px; box-sizing: content-box; } }
+
+.group { background: var(--card); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+.row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-height: 52px; width: 100%; text-align: left; background: none; border: 0; cursor: pointer; position: relative; }
+.row + .row::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: var(--sep); }
+.row .t { flex: 1; min-width: 0; }
+.row .t b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .t span { display: block; color: var(--label2); font-size: 15px; line-height: 20px; }
+.row .chev { color: var(--label3); }
+.row:active { background: var(--fill); }
+
+.chip { font-size: 12px; line-height: 16px; padding: 2px 8px; border-radius: 99px; background: var(--fill); color: var(--label2); white-space: nowrap; }
+.chip.ok { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.chip.warn { background: rgba(255,141,40,.16); color: var(--orange); font-weight: 600; }
+
+.btn { display: block; width: 100%; border: 0; border-radius: 14px; padding: 15px 16px; font-size: 17px; font-weight: 600; background: var(--accent); color: var(--accent-ink); cursor: pointer; text-align: center; transition: transform .2s var(--ease), opacity .2s; }
+.btn:active { transform: scale(.98); opacity: .9; }
+.btn.sec { background: var(--card); color: var(--accent); box-shadow: var(--shadow); }
+.btn.tint { background: var(--accent-soft); color: var(--accent); }
+.btn.danger { background: var(--card); color: var(--red); box-shadow: var(--shadow); }
+.btn[disabled] { opacity: .45; pointer-events: none; }
+.btns { display: grid; gap: 10px; margin-top: 18px; }
+.btns.two { grid-template-columns: 1fr 1fr; }
+
+.field { background: var(--card); border-radius: 14px; box-shadow: var(--shadow); padding: 12px 16px; }
+.field label { display: block; font-size: 13px; line-height: 18px; color: var(--label2); margin-bottom: 2px; }
+.field input, .field textarea { width: 100%; border: 0; outline: 0; background: transparent; padding: 4px 0; resize: none; }
+.field textarea { min-height: 170px; line-height: 24px; }
+.hint { color: var(--label2); font-size: 13px; line-height: 18px; margin: 8px 16px 0; }
+
+.fotos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.foto { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: var(--fill); }
+.foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.foto .x { position: absolute; top: 6px; right: 6px; width: 30px; height: 30px; border-radius: 50%; border: 0; background: rgba(0,0,0,.55); color: #fff; display: grid; place-items: center; cursor: pointer; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.foto .n { position: absolute; left: 6px; bottom: 6px; font-size: 12px; font-weight: 600; color: #fff; background: rgba(0,0,0,.5); border-radius: 99px; padding: 1px 7px; }
+.vacio { color: var(--label2); text-align: center; padding: 22px 12px; font-size: 15px; }
+
+.bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg) 78%, transparent); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); display: none; }
+.bar.on { display: block; }
+.bar .in { max-width: 640px; margin: 0 auto; display: grid; gap: 10px; }
+.bar .in.two { grid-template-columns: 1fr 1fr; }
+
+.search { width: 100%; border: 0; outline: 0; background: var(--fill); border-radius: 12px; padding: 11px 14px; margin: 4px 0 14px; }
+
+#toast { position: fixed; left: 16px; right: 16px; top: calc(10px + env(safe-area-inset-top)); max-width: 608px; margin: 0 auto; background: rgba(40,40,44,.94); color: #fff; padding: 12px 16px; border-radius: 14px; font-size: 15px; display: none; align-items: center; justify-content: space-between; gap: 12px; z-index: 30; box-shadow: var(--shadow); }
+#toast.on { display: flex; animation: in .3s var(--ease); }
+#toast button { background: none; border: 0; color: #9ad45a; font-weight: 600; cursor: pointer; }
+
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: none; align-items: flex-end; justify-content: center; z-index: 40; padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+.modal.on { display: flex; }
+.sheet { background: var(--card); border-radius: 22px; padding: 20px; width: 100%; max-width: 480px; animation: in .35s var(--ease); }
+.sheet h3 { margin: 0 0 6px; font-size: 20px; line-height: 25px; font-weight: 600; }
+.sheet p { margin: 0 0 16px; color: var(--label2); font-size: 15px; line-height: 20px; }
+.visor { background: #000; align-items: center; padding: 0; }
+.visor img { max-width: 100%; max-height: 100dvh; object-fit: contain; }
+
+.ok-ico { width: 72px; height: 72px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; margin: 56px auto 18px; }
+.center { text-align: center; }
+.err { color: var(--red); font-size: 15px; margin: 10px 16px 0; min-height: 20px; }
+.spin { display: inline-block; width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: giro .7s linear infinite; vertical-align: -3px; margin-right: 8px; }
+@keyframes giro { to { transform: rotate(360deg); } }
+svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.btn svg { vertical-align: -5px; margin-right: 6px; }
+</style>
+</head>
+<body>
+
+<!-- ============ Login ============ -->
+<section id="s-login" class="screen">
+  <img class="logo" src="logo-gh.png" alt="GH Consultora">
+  <h1>Auditoría de campo</h1>
+  <p class="sub">Entrá con tu cuenta de GH Consultora. Solo hace falta la primera vez: la sesión dura 30 días.</p>
+  <div id="gsi" style="min-height:44px"></div>
+  <div class="err" id="login-err"></div>
+  <h2>Si el botón de Google no funciona</h2>
+  <div class="group" style="padding:4px 16px 12px">
+    <div class="field" style="box-shadow:none;padding:8px 0;border-bottom:.5px solid var(--sep);border-radius:0"><label for="l-mail">Tu mail de GH</label><input id="l-mail" type="email" inputmode="email" autocapitalize="none" autocomplete="username" placeholder="fm.ghconsultora@gmail.com"></div>
+    <div class="field" style="box-shadow:none;padding:8px 0;border-radius:0"><label for="l-cod">Código de acceso</label><input id="l-cod" type="text" autocapitalize="characters" autocomplete="off" placeholder="Te lo pasa Felipe"></div>
+  </div>
+  <div class="btns"><button class="btn sec" id="l-go">Entrar con código</button></div>
+</section>
+
+<!-- ============ Inicio ============ -->
+<section id="s-home" class="screen">
+  <div class="top"><span class="quien" id="h-quien"></span><button class="back" id="h-salir" style="color:var(--label2);font-size:15px">Salir</button></div>
+  <h1>Auditorías</h1>
+  <p class="sub">Cada sector se guarda apenas lo terminás. Si se corta algo, no perdés nada.</p>
+  <div id="h-retomar"></div>
+  <div class="btns"><button class="btn" id="h-nueva"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva visita</button></div>
+  <p class="hint" id="h-ayuda"></p>
+</section>
+
+<!-- ============ Elegir empresa ============ -->
+<section id="s-empresa" class="screen">
+  <div class="top"><button class="back" id="e-volver"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Inicio</button></div>
+  <h1>¿Qué empresa?</h1>
+  <input class="search" id="e-buscar" type="search" placeholder="Buscar empresa" autocomplete="off">
+  <div class="group" id="e-lista"></div>
+  <div class="err" id="e-err"></div>
+</section>
+
+<!-- ============ Visita ============ -->
+<section id="s-visita" class="screen">
+  <div class="top"><button class="back" id="v-volver"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Inicio</button></div>
+  <h1 id="v-empresa"></h1>
+  <p class="sub" id="v-sub"></p>
+  <div id="v-lista"></div>
+  <div class="err" id="v-err"></div>
+</section>
+
+<!-- ============ Sector ============ -->
+<section id="s-sector" class="screen">
+  <div class="top"><button class="back" id="x-volver"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Sectores</button><span class="chip" id="x-estado"></span></div>
+  <h1 id="x-titulo">Nuevo sector</h1>
+  <div class="field"><label for="x-nombre">Nombre del sector</label><input id="x-nombre" type="text" autocapitalize="sentences" placeholder="Ej.: Depósito de pinturas" enterkeyhint="next"></div>
+  <h2>Lo que observaste</h2>
+  <div class="field"><label for="x-texto">Notas</label><textarea id="x-texto" placeholder="Escribí o dictá. Para dictar, tocá el micrófono 🎤 del teclado: podés hablar todo lo que quieras y después corregir el texto."></textarea></div>
+  <p class="hint">Se guarda solo en el teléfono mientras escribís.</p>
+  <h2>Fotos <span id="x-cant"></span></h2>
+  <div class="btns two" style="margin-top:0">
+    <button class="btn tint" id="x-cam"><svg viewBox="0 0 24 24"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Sacar foto</button>
+    <button class="btn tint" id="x-gal"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="M4 17l5-4.5 4 3.5 3-2.5 4 3.5"/></svg>De la galería</button>
+  </div>
+  <div class="fotos" id="x-fotos"></div>
+  <div class="err" id="x-err"></div>
+  <div class="btns"><button class="btn danger" id="x-borrar">Eliminar sector</button></div>
+  <input type="file" id="in-cam" accept="image/*" capture="environment" hidden>
+  <input type="file" id="in-gal" accept="image/*" multiple hidden>
+</section>
+
+<!-- ============ Listo ============ -->
+<section id="s-fin" class="screen center">
+  <div class="ok-ico"><svg viewBox="0 0 24 24" style="width:36px;height:36px;stroke-width:2.4"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+  <h1>Visita enviada</h1>
+  <p class="sub" id="f-msg"></p>
+  <div class="btns"><button class="btn" id="f-home">Volver al inicio</button></div>
+</section>
+
+<!-- barras de acción -->
+<div class="bar" id="bar-visita"><div class="in two">
+  <button class="btn sec" id="v-nuevo-sector"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo sector</button>
+  <button class="btn" id="v-terminar">Terminar visita</button>
+</div></div>
+<div class="bar" id="bar-sector"><div class="in">
+  <button class="btn" id="x-guardar">Guardar sector</button>
+</div></div>
+
+<div id="toast"><span id="toast-t"></span><button id="toast-b"></button></div>
+<div class="modal" id="modal"><div class="sheet"><h3 id="m-t"></h3><p id="m-p"></p><div class="btns" id="m-b" style="margin-top:0"></div></div></div>
+<div class="modal visor" id="visor"><img id="visor-img" alt=""></div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+'use strict';
+const API = 'https://script.google.com/macros/s/AKfycbyLjDLeRz3X1bHXaOOERgx4LPM0ngus2qCWuMHmmxi_AhPYYjo7yaUx0g3hntp5yiK1/exec';
+const CLIENT_ID = '397447072902-nhbl4at1hhd41igam0hbq7p2kc0gt8up.apps.googleusercontent.com';
+const MAX_LADO = 1600, CALIDAD = 0.7;
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
+const I = {
+  chev: '<svg class="chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
+  x: '<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke-width:2.4"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+};
+
+/* ---------- almacenamiento local (IndexedDB: la visita, con sus fotos, vive en el teléfono) ---------- */
+let _db;
+function db() {
+  return _db || (_db = new Promise((res, rej) => {
+    const r = indexedDB.open('gh-campo', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  }));
+}
+async function dbGet(k) { const d = await db(); return new Promise((res, rej) => { const q = d.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
+async function dbSet(k, v) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
+async function dbDel(k) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction('kv', 'readwrite'); t.objectStore('kv').delete(k); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
+
+let sesion = null;          // {sesion, nombre, email}
+let visita = null;          // visita en curso
+let empresas = [];
+let sectorActual = null;    // sector abierto en el editor
+
+const guardarVisita = () => visita ? dbSet('visita', visita) : dbDel('visita');
+function guardarSesion(s) { sesion = s; try { localStorage.setItem('gh_sesion', JSON.stringify(s)); } catch (e) {} }
+
+/* ---------- red ---------- */
+async function api(body) {
+  const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+  const j = await r.json();
+  if (j && j.error === 'sesion_invalida') { cerrarSesion(); throw new Error('La sesión venció. Entrá de nuevo.'); }
+  return j;
+}
+const conSesion = (b) => api({ ...b, sesion: sesion && sesion.sesion });
+const sinRed = (e) => /fetch|network|load failed|failed to/i.test(String(e && e.message));
+
+/* ---------- pantallas ---------- */
+function ir(nombre) {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('on', s.id === 's-' + nombre));
+  $('bar-visita').classList.toggle('on', nombre === 'visita');
+  $('bar-sector').classList.toggle('on', nombre === 'sector');
+  window.scrollTo(0, 0);
+}
+let toastT;
+function toast(msg, accion, fn) {
+  $('toast-t').textContent = msg;
+  const b = $('toast-b'); b.textContent = accion || ''; b.style.display = accion ? '' : 'none'; b.onclick = () => { $('toast').classList.remove('on'); fn && fn(); };
+  $('toast').classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => $('toast').classList.remove('on'), accion ? 6000 : 3500);
+}
+function confirmar(titulo, texto, si, siRojo) {
+  return new Promise((res) => {
+    $('m-t').textContent = titulo; $('m-p').textContent = texto;
+    $('m-b').innerHTML = `<button class="btn ${siRojo ? 'danger' : ''}" id="m-si">${esc(si)}</button><button class="btn sec" id="m-no">Cancelar</button>`;
+    $('modal').classList.add('on');
+    const cerrar = (v) => { $('modal').classList.remove('on'); res(v); };
+    $('m-si').onclick = () => cerrar(true); $('m-no').onclick = () => cerrar(false);
+  });
+}
+
+/* ---------- login ---------- */
+function mostrarLogin() {
+  ir('login');
+  const t = setInterval(() => {
+    if (!(window.google && google.accounts && google.accounts.id)) return;
+    clearInterval(t);
+    google.accounts.id.initialize({ client_id: CLIENT_ID, callback: async (resp) => entrar({ idToken: resp.credential }) });
+    google.accounts.id.renderButton($('gsi'), { theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', width: 300 });
+  }, 250);
+}
+async function entrar(cred) {
+  $('login-err').textContent = '';
+  try {
+    const j = await api({ action: 'login', ...cred });
+    if (!j.ok) { $('login-err').textContent = j.error === 'no_autorizado' ? 'Esa cuenta no está autorizada.' : (j.error === 'codigo_invalido' ? 'Mail o código incorrecto.' : 'No se pudo entrar (' + j.error + ').'); return; }
+    guardarSesion({ sesion: j.sesion, nombre: j.nombre, email: j.email });
+    await iniciar();
+  } catch (e) { $('login-err').textContent = sinRed(e) ? 'Sin conexión. Probá de nuevo cuando tengas señal.' : e.message; }
+}
+$('l-go').onclick = () => entrar({ email: $('l-mail').value.trim(), codigo: $('l-cod').value.trim() });
+function cerrarSesion() { sesion = null; try { localStorage.removeItem('gh_sesion'); } catch (e) {} mostrarLogin(); }
+$('h-salir').onclick = async () => { if (await confirmar('¿Salir?', visita ? 'Tu visita sin terminar queda guardada en este teléfono.' : 'Vas a tener que entrar de nuevo.', 'Salir')) cerrarSesion(); };
+
+/* ---------- inicio ---------- */
+function nSectoresGuardados(v) { return v.sectores.filter((s) => s.vSubido === s.v).length; }
+function pintarHome() {
+  ir('home');
+  $('h-quien').textContent = sesion.nombre;
+  const r = $('h-retomar');
+  if (visita) {
+    const n = visita.sectores.length;
+    r.innerHTML = `<h2>Visita sin terminar</h2><div class="group"><button class="row" id="h-seguir"><div class="t"><b>${esc(visita.empresa)}</b><span>${n} sector${n === 1 ? '' : 'es'} · ${nSectoresGuardados(visita)} guardados en el servidor</span></div>${I.chev}</button></div>`;
+    $('h-seguir').onclick = () => pintarVisita();
+    $('h-nueva').textContent = 'Empezar otra visita';
+  } else { r.innerHTML = ''; $('h-nueva').innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva visita'; }
+  const ios = /iphone|ipad/i.test(navigator.userAgent), standalone = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+  $('h-ayuda').textContent = ios && !standalone ? 'Tip: en Safari tocá Compartir → “Agregar a inicio” para abrirla como una app.' : '';
+}
+$('h-nueva').onclick = async () => {
+  if (visita && !(await confirmar('Ya tenés una visita sin terminar', 'Si empezás otra, la anterior se borra de este teléfono (lo ya enviado al servidor queda guardado).', 'Empezar otra', true))) return;
+  pintarEmpresas();
+};
+
+/* ---------- elegir empresa ---------- */
+async function cargarEmpresas() {
+  try {
+    const j = await conSesion({ action: 'campo_empresas' });
+    if (j.ok) { empresas = j.empresas; localStorage.setItem('gh_empresas', JSON.stringify(empresas)); return; }
+  } catch (e) { /* sin red: se usa la última lista */ }
+  try { empresas = JSON.parse(localStorage.getItem('gh_empresas') || '[]'); } catch (e) { empresas = []; }
+}
+function pintarEmpresas() {
+  ir('empresa'); $('e-buscar').value = ''; listarEmpresas(); $('e-err').textContent = empresas.length ? '' : 'No se pudo cargar la lista de empresas. Revisá la conexión.';
+  if (!empresas.length) cargarEmpresas().then(() => { listarEmpresas(); $('e-err').textContent = empresas.length ? '' : 'No se pudo cargar la lista de empresas. Revisá la conexión.'; });
+}
+function listarEmpresas() {
+  const q = $('e-buscar').value.trim().toLowerCase();
+  const l = empresas.filter((e) => e.toLowerCase().includes(q));
+  $('e-lista').innerHTML = l.map((e, i) => `<button class="row" data-i="${i}"><div class="t"><b>${esc(e)}</b></div>${I.chev}</button>`).join('') || '<div class="vacio">Sin resultados</div>';
+  $('e-lista').querySelectorAll('.row').forEach((b) => b.onclick = () => nuevaVisita(l[+b.dataset.i]));
+}
+$('e-buscar').oninput = listarEmpresas;
+$('e-volver').onclick = pintarHome;
+async function nuevaVisita(empresa) {
+  visita = { id: uid(), empresa, creada: Date.now(), sectores: [] };
+  await guardarVisita(); pintarVisita();
+}
+
+/* ---------- visita: lista de sectores ---------- */
+function estadoSector(s) { return s.vSubido === s.v ? ['ok', 'Guardado'] : (s.vSubido ? ['warn', 'Cambios sin enviar'] : ['warn', 'Sin enviar']); }
+function pintarVisita() {
+  ir('visita');
+  $('v-empresa').textContent = visita.empresa;
+  const n = visita.sectores.length;
+  $('v-sub').textContent = n ? `${n} sector${n === 1 ? '' : 'es'}. Tocá uno para editarlo.` : 'Empezá agregando el primer sector.';
+  $('v-lista').innerHTML = n ? '<div class="group">' + visita.sectores.map((s, i) => {
+    const [cls, txt] = estadoSector(s);
+    return `<button class="row" data-i="${i}"><div class="t"><b>${i + 1}. ${esc(s.nombre || 'Sin nombre')}</b><span>${s.fotos.length} foto${s.fotos.length === 1 ? '' : 's'}${s.texto ? ' · ' + esc(s.texto.slice(0, 40)) + (s.texto.length > 40 ? '…' : '') : ''}</span></div><span class="chip ${cls}">${txt}</span>${I.chev}</button>`;
+  }).join('') + '</div>' : '';
+  $('v-lista').querySelectorAll('.row').forEach((b) => b.onclick = () => abrirSector(visita.sectores[+b.dataset.i]));
+  $('v-terminar').disabled = !n;
+}
+$('v-volver').onclick = pintarHome;
+$('v-nuevo-sector').onclick = () => {
+  const s = { id: uid(), nombre: '', texto: '', fotos: [], v: 1, vSubido: 0, nuevo: true };
+  visita.sectores.push(s); guardarVisita(); abrirSector(s);
+};
+
+/* ---------- editor de sector ---------- */
+let urls = [];
+function abrirSector(s) {
+  sectorActual = s; ir('sector');
+  $('x-titulo').textContent = s.nombre || 'Nuevo sector';
+  $('x-nombre').value = s.nombre; $('x-texto').value = s.texto; $('x-err').textContent = '';
+  pintarFotos(); pintarEstado();
+  autoalto();
+}
+function pintarEstado() { const [cls, txt] = estadoSector(sectorActual); const c = $('x-estado'); c.className = 'chip ' + cls; c.textContent = txt; }
+function autoalto() { const t = $('x-texto'); t.style.height = 'auto'; t.style.height = Math.max(170, t.scrollHeight) + 'px'; }
+function pintarFotos() {
+  urls.forEach(URL.revokeObjectURL); urls = [];
+  const f = sectorActual.fotos;
+  $('x-cant').textContent = f.length ? '(' + f.length + ')' : '';
+  $('x-fotos').innerHTML = f.length ? f.map((p, i) => { const u = URL.createObjectURL(p.blob); urls.push(u); return `<div class="foto"><img src="${u}" data-i="${i}" alt="Foto ${i + 1}"><span class="n">${i + 1}</span><button class="x" data-q="${i}" aria-label="Quitar foto ${i + 1}">${I.x}</button></div>`; }).join('') : '';
+  if (!f.length) $('x-fotos').innerHTML = '<div class="vacio" style="grid-column:1/-1">Todavía no hay fotos de este sector.</div>';
+  $('x-fotos').querySelectorAll('img').forEach((im) => im.onclick = () => { $('visor-img').src = im.src; $('visor').classList.add('on'); });
+  $('x-fotos').querySelectorAll('.x').forEach((b) => b.onclick = () => quitarFoto(+b.dataset.q));
+}
+$('visor').onclick = () => $('visor').classList.remove('on');
+function quitarFoto(i) {
+  const [q] = sectorActual.fotos.splice(i, 1); marcarCambio(); pintarFotos();
+  toast('Foto quitada', 'Deshacer', () => { sectorActual.fotos.splice(i, 0, q); marcarCambio(); pintarFotos(); });
+}
+let tGuardar;
+function marcarCambio() { sectorActual.v++; sectorActual.nuevo = false; pintarEstado(); clearTimeout(tGuardar); tGuardar = setTimeout(guardarVisita, 300); }
+$('x-nombre').oninput = () => { sectorActual.nombre = $('x-nombre').value; marcarCambio(); };
+$('x-texto').oninput = () => { sectorActual.texto = $('x-texto').value; autoalto(); marcarCambio(); };
+$('x-cam').onclick = () => $('in-cam').click();
+$('x-gal').onclick = () => $('in-gal').click();
+['in-cam', 'in-gal'].forEach((id) => $(id).onchange = async (e) => {
+  const files = [...e.target.files]; e.target.value = '';
+  if (!files.length) return;
+  $('x-err').textContent = '';
+  for (const f of files) {
+    try { sectorActual.fotos.push({ id: uid(), blob: await comprimir(f) }); marcarCambio(); pintarFotos(); }
+    catch (err) { $('x-err').textContent = 'No se pudo leer una de las fotos.'; }
+  }
+  await guardarVisita();
+});
+async function comprimir(file) {
+  let bmp;
+  try { bmp = await createImageBitmap(file); }
+  catch (e) { bmp = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = URL.createObjectURL(file); }); }
+  const w = bmp.width, h = bmp.height, k = Math.min(1, MAX_LADO / Math.max(w, h));
+  const c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  if (bmp.close) bmp.close();
+  const blob = await new Promise((res) => c.toBlob(res, 'image/jpeg', CALIDAD));
+  if (!blob || !blob.size) throw new Error('foto_vacia');
+  return blob;
+}
+$('x-volver').onclick = async () => {
+  const s = sectorActual;
+  if (s.nuevo && !s.nombre && !s.texto && !s.fotos.length) visita.sectores = visita.sectores.filter((x) => x !== s); // sector vacío: no se guarda
+  await guardarVisita(); pintarVisita();
+  subirPendientes(true);
+};
+$('x-borrar').onclick = async () => {
+  if (!(await confirmar('¿Eliminar este sector?', 'Se borran sus notas y fotos.', 'Eliminar', true))) return;
+  visita.sectores = visita.sectores.filter((x) => x !== sectorActual); await guardarVisita(); pintarVisita();
+};
+$('x-guardar').onclick = async () => {
+  const s = sectorActual;
+  if (!s.nombre.trim()) { $('x-err').textContent = 'Ponele un nombre al sector.'; $('x-nombre').focus(); return; }
+  if (!s.texto.trim() && !s.fotos.length) { $('x-err').textContent = 'Agregá notas o al menos una foto.'; return; }
+  s.nuevo = false; await guardarVisita();
+  const b = $('x-guardar'); b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
+  const r = await subirSector(s);
+  b.disabled = false; b.textContent = 'Guardar sector';
+  if (r === true) { pintarVisita(); toast('Sector guardado'); }
+  else { pintarVisita(); toast(r === 'red' ? 'Sin conexión: queda en el teléfono y se envía cuando haya señal.' : 'No se pudo enviar: ' + r); }
+};
+
+/* ---------- envío al servidor (sector por sector) ---------- */
+const b64 = (blob) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); });
+let subiendo = Promise.resolve();
+function subirSector(s) { // se encadenan: nunca dos subidas a la vez
+  const t = subiendo.then(() => subirSectorYa(s)); subiendo = t.catch(() => {}); return t;
+}
+async function subirSectorYa(s) {
+  if (!visita || !visita.sectores.includes(s)) return true;
+  const v = s.v;
+  try {
+    const fotos = [];
+    for (const p of s.fotos) fotos.push({ base64: await b64(p.blob), mime: 'image/jpeg' });
+    const j = await conSesion({ action: 'campo_sector', visitaId: visita.id, empresa: visita.empresa, sectorId: s.id, nombre: s.nombre, texto: s.texto, fotos });
+    if (!j.ok) return j.error + (j.recibido ? ' (' + j.recibido + ')' : '');
+    s.vSubido = v; await guardarVisita(); return true;
+  } catch (e) { return sinRed(e) ? 'red' : e.message; }
+}
+async function subirPendientes(silencioso) {
+  if (!visita || !sesion) return true;
+  let ok = true;
+  for (const s of [...visita.sectores]) {
+    if (s.vSubido === s.v || (s.nuevo && !s.nombre && !s.texto && !s.fotos.length)) continue;
+    if (!s.nombre.trim() || (!s.texto.trim() && !s.fotos.length)) continue; // incompleto: no se envía
+    const r = await subirSector(s); if (r !== true) ok = false;
+  }
+  if ($('s-visita').classList.contains('on')) pintarVisita();
+  return ok;
+}
+window.addEventListener('online', () => subirPendientes(true));
+
+/* ---------- terminar ---------- */
+$('v-terminar').onclick = async () => {
+  $('v-err').textContent = '';
+  const incompletos = visita.sectores.filter((s) => !s.nombre.trim() || (!s.texto.trim() && !s.fotos.length));
+  if (incompletos.length) { $('v-err').textContent = 'Hay sectores sin nombre o vacíos: completalos o eliminalos antes de terminar.'; return; }
+  const fotos = visita.sectores.reduce((a, s) => a + s.fotos.length, 0);
+  if (!fotos) { $('v-err').textContent = 'La visita necesita al menos una foto.'; return; }
+  if (fotos > 40) { $('v-err').textContent = `Hay ${fotos} fotos y el máximo por visita es 40. Quitá algunas.`; return; }
+  const n = visita.sectores.length;
+  if (!(await confirmar('¿Terminar la visita?', `Se procesan ${n} sector${n === 1 ? '' : 'es'} y ${fotos} foto${fotos === 1 ? '' : 's'}, y te llega el borrador por mail.`, 'Terminar y enviar'))) return;
+  const b = $('v-terminar'); b.disabled = true; b.innerHTML = '<span class="spin"></span>Enviando…';
+  try {
+    if (!(await subirPendientes())) { $('v-err').textContent = 'No se pudieron enviar todos los sectores. Revisá la conexión y probá de nuevo.'; return; }
+    const j = await conSesion({ action: 'campo_finalizar', visitaId: visita.id, orden: visita.sectores.map((s) => s.id) });
+    if (!j.ok) { $('v-err').textContent = 'No se pudo terminar: ' + j.error + (j.recibido ? ' (' + j.recibido + ')' : ''); return; }
+    $('f-msg').textContent = j.mensaje; visita = null; await guardarVisita(); ir('fin');
+  } catch (e) { $('v-err').textContent = sinRed(e) ? 'Sin conexión. Tu visita está guardada en el teléfono: probá de nuevo con señal.' : e.message; }
+  finally { b.disabled = false; b.textContent = 'Terminar visita'; }
+};
+$('f-home').onclick = pintarHome;
+
+/* ---------- arranque ---------- */
+async function iniciar() {
+  if (!sesion) return mostrarLogin();
+  visita = (await dbGet('visita')) || null;
+  pintarHome();
+  cargarEmpresas();
+  subirPendientes(true);
+}
+(async function () {
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  try { sesion = JSON.parse(localStorage.getItem('gh_sesion') || 'null'); } catch (e) { sesion = null; }
+  await iniciar();
+})();
+</script>
+</body>
+</html>
