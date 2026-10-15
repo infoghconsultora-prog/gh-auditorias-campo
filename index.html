@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f8f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14170f" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Auditoría">
@@ -15,21 +15,24 @@
 <style>
 :root {
   color-scheme: light dark;
-  --bg: #f2f2f7; --card: #ffffff; --fill: rgba(120,120,128,.12); --sep: rgba(60,60,67,.18);
-  --label: #000; --label2: rgba(60,60,67,.62); --label3: rgba(60,60,67,.38);
-  --accent: #5a9a1f; --accent-ink: #ffffff; --accent-soft: rgba(90,154,31,.14);
-  --red: #ff383c; --orange: #ff8d28; --blue: #0088ff;
-  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.07);
+  /* paleta GH (la misma de seguimiento-ambiental, calibraciones, mediciones y documentos) */
+  --bg: #f7f8f4; --card: #ffffff; --fill: #e7eae2; --sep: #dfe3da;
+  --label: #2b2f26; --label2: #5b6058; --label3: #8d9287;
+  --brand: #8dc63f; --accent: #4a7a1e; --accent-ink: #ffffff; --accent-soft: #eaf4e2;
+  --verde: #4c9a2a; --verde-bg: #eaf4e2; --naranja: #c56a15; --naranja-bg: #fbe6d2;
+  --red: #b3261e; --red-bg: #f9e0de; --blue: #35618f;
+  --shadow: 0 1px 2px rgba(43,47,38,.06), 0 8px 24px rgba(43,47,38,.08);
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --ease: cubic-bezier(.32,.72,0,1);
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #000; --card: #1c1c1e; --fill: rgba(120,120,128,.24); --sep: rgba(84,84,88,.55);
-    --label: #fff; --label2: rgba(235,235,245,.62); --label3: rgba(235,235,245,.32);
-    --accent: #7dbd3a; --accent-ink: #0b1a00; --accent-soft: rgba(125,189,58,.2);
-    --red: #ff4245; --orange: #ff9230; --blue: #0091ff;
-    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.4);
+    --bg: #14170f; --card: #1c211a; --fill: #2a3025; --sep: #2a2f24;
+    --label: #eef0e8; --label2: #a7ad9d; --label3: #7d8377;
+    --accent: #8dc63f; --accent-ink: #14170f; --accent-soft: #1d2b16;
+    --verde: #6ab83f; --verde-bg: #1d2b16; --naranja: #d67c26; --naranja-bg: #2b1f10;
+    --red: #c9372e; --red-bg: #2b1513; --blue: #4b7cae;
+    --shadow: 0 1px 2px rgba(0,0,0,.32), 0 8px 24px rgba(0,0,0,.38);
   }
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -60,8 +63,8 @@ h2 { font-size: 13px; line-height: 18px; font-weight: 400; text-transform: upper
 .row:active { background: var(--fill); }
 
 .chip { font-size: 12px; line-height: 16px; padding: 2px 8px; border-radius: 99px; background: var(--fill); color: var(--label2); white-space: nowrap; }
-.chip.ok { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
-.chip.warn { background: rgba(255,141,40,.16); color: var(--orange); font-weight: 600; }
+.chip.ok { background: var(--verde-bg); color: var(--verde); font-weight: 600; }
+.chip.warn { background: var(--naranja-bg); color: var(--naranja); font-weight: 600; }
 
 .btn { display: block; width: 100%; border: 0; border-radius: 14px; padding: 15px 16px; font-size: 17px; font-weight: 600; background: var(--accent); color: var(--accent-ink); cursor: pointer; text-align: center; transition: transform .2s var(--ease), opacity .2s; }
 .btn:active { transform: scale(.98); opacity: .9; }
@@ -92,9 +95,9 @@ h2 { font-size: 13px; line-height: 18px; font-weight: 400; text-transform: upper
 
 .search { width: 100%; border: 0; outline: 0; background: var(--fill); border-radius: 12px; padding: 11px 14px; margin: 4px 0 14px; }
 
-#toast { position: fixed; left: 16px; right: 16px; top: calc(10px + env(safe-area-inset-top)); max-width: 608px; margin: 0 auto; background: rgba(40,40,44,.94); color: #fff; padding: 12px 16px; border-radius: 14px; font-size: 15px; display: none; align-items: center; justify-content: space-between; gap: 12px; z-index: 30; box-shadow: var(--shadow); }
+#toast { position: fixed; left: 16px; right: 16px; top: calc(10px + env(safe-area-inset-top)); max-width: 608px; margin: 0 auto; background: rgba(35,38,28,.95); color: #fff; padding: 12px 16px; border-radius: 14px; font-size: 15px; display: none; align-items: center; justify-content: space-between; gap: 12px; z-index: 30; box-shadow: var(--shadow); }
 #toast.on { display: flex; animation: in .3s var(--ease); }
-#toast button { background: none; border: 0; color: #9ad45a; font-weight: 600; cursor: pointer; }
+#toast button { background: none; border: 0; color: var(--brand); font-weight: 600; cursor: pointer; }
 
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: none; align-items: flex-end; justify-content: center; z-index: 40; padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
 .modal.on { display: flex; }
@@ -104,7 +107,7 @@ h2 { font-size: 13px; line-height: 18px; font-weight: 400; text-transform: upper
 .visor { background: #000; align-items: center; padding: 0; }
 .visor img { max-width: 100%; max-height: 100dvh; object-fit: contain; }
 
-.ok-ico { width: 72px; height: 72px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; margin: 56px auto 18px; }
+.ok-ico { width: 72px; height: 72px; border-radius: 50%; background: var(--verde-bg); color: var(--verde); display: grid; place-items: center; margin: 56px auto 18px; }
 .center { text-align: center; }
 .err { color: var(--red); font-size: 15px; margin: 10px 16px 0; min-height: 20px; }
 .spin { display: inline-block; width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: giro .7s linear infinite; vertical-align: -3px; margin-right: 8px; }
@@ -124,8 +127,8 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   <div class="err" id="login-err"></div>
   <h2>Si el botón de Google no funciona</h2>
   <div class="group" style="padding:4px 16px 12px">
-    <div class="field" style="box-shadow:none;padding:8px 0;border-bottom:.5px solid var(--sep);border-radius:0"><label for="l-mail">Tu mail de GH</label><input id="l-mail" type="email" inputmode="email" autocapitalize="none" autocomplete="username" placeholder="fm.ghconsultora@gmail.com"></div>
-    <div class="field" style="box-shadow:none;padding:8px 0;border-radius:0"><label for="l-cod">Código de acceso</label><input id="l-cod" type="text" autocapitalize="characters" autocomplete="off" placeholder="Te lo pasa Felipe"></div>
+    <div class="field" style="box-shadow:none;padding:8px 0;border-bottom:.5px solid var(--sep);border-radius:0"><label for="l-mail">Tu mail de GH</label><input id="l-mail" type="email" inputmode="email" autocapitalize="none" autocomplete="username" placeholder="Tu mail"></div>
+    <div class="field" style="box-shadow:none;padding:8px 0;border-radius:0"><label for="l-cod">Código de acceso</label><input id="l-cod" type="text" autocapitalize="characters" autocomplete="off" placeholder="Código de acceso"></div>
   </div>
   <div class="btns"><button class="btn sec" id="l-go">Entrar con código</button></div>
 </section>
