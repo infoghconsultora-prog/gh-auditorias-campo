@@ -22,6 +22,10 @@
   --verde: #4c9a2a; --verde-bg: #eaf4e2; --naranja: #c56a15; --naranja-bg: #fbe6d2;
   --red: #b3261e; --red-bg: #f9e0de; --blue: #35618f;
   --shadow: 0 1px 2px rgba(43,47,38,.06), 0 8px 24px rgba(43,47,38,.08);
+  --shadow-elev: 0 2px 4px rgba(43,47,38,.10), 0 16px 40px rgba(43,47,38,.14);
+  --glass-bg: rgba(255,255,255,.48); --glass-blur: blur(24px) saturate(180%) brightness(1.03);
+  --glass-highlight: rgba(255,255,255,.55); --glass-bevel: rgba(43,47,38,.05);
+  --r-sm: 10px; --r-xl: 20px;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --ease: cubic-bezier(.32,.72,0,1);
 }
@@ -33,6 +37,8 @@
     --verde: #6ab83f; --verde-bg: #1d2b16; --naranja: #d67c26; --naranja-bg: #2b1f10;
     --red: #c9372e; --red-bg: #2b1513; --blue: #4b7cae;
     --shadow: 0 1px 2px rgba(0,0,0,.32), 0 8px 24px rgba(0,0,0,.38);
+    --shadow-elev: 0 2px 4px rgba(0,0,0,.38), 0 16px 40px rgba(0,0,0,.48);
+    --glass-bg: rgba(28,33,26,.42); --glass-highlight: rgba(255,255,255,.12); --glass-bevel: rgba(0,0,0,.22);
   }
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -44,16 +50,36 @@ button, input, textarea, select { font: inherit; color: inherit; }
 @keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .screen { animation: none; } * { transition: none !important; } }
 
-.top { position: sticky; top: 0; z-index: 20; isolation: isolate; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; margin: 0 -16px 4px; padding: 6px 16px;
-  background: color-mix(in srgb, var(--bg) 62%, transparent); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
-  box-shadow: inset 0 -.5px 0 var(--sep); }
+.top { position: sticky; top: 0; z-index: 20; isolation: isolate; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; margin: 0 -16px 8px; padding: 10px 16px;
+  background: var(--glass-bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  box-shadow: inset 0 1px 1px var(--glass-highlight), inset 0 -1px 1px var(--glass-bevel), 0 8px 30px rgba(43,47,38,.10); }
+.top::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: -1; background: linear-gradient(120deg, rgba(255,255,255,.28) 0%, rgba(255,255,255,.07) 30%, rgba(255,255,255,0) 55%); }
+body::before { content: ""; position: fixed; top: -160px; left: -80px; right: -80px; height: 420px; z-index: 0; pointer-events: none; filter: blur(60px); opacity: .55;
+  background: radial-gradient(circle at 18% 30%, color-mix(in srgb, var(--brand) 38%, transparent), transparent 62%), radial-gradient(circle at 76% 12%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 58%); }
+.screen { position: relative; z-index: 1; }
 .top .back { color: var(--accent); background: none; border: 0; padding: 8px 0; font-size: 17px; display: inline-flex; align-items: center; gap: 2px; cursor: pointer; }
-.top .quien { color: var(--label2); font-size: 13px; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand .t1 { font-size: 17px; line-height: 22px; font-weight: 600; letter-spacing: -.3px; white-space: nowrap; }
+.brand .t2 { font-size: 13px; line-height: 18px; color: var(--label2); white-space: nowrap; }
+@media (max-width: 520px) { .brand .t2 { display: none; } .cuenta b { display: none; } }
+.cuenta { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--label2); }
+.cuenta b { color: var(--accent); font-weight: 600; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cuenta button { border: 0; background: var(--fill); color: var(--label2); cursor: pointer; border-radius: 999px; padding: 5px 12px; font-size: 13px; font-weight: 600; }
 h1 { font-size: 34px; line-height: 41px; font-weight: 700; letter-spacing: .01em; margin: 4px 0 4px; }
 h2 { font-size: 13px; line-height: 18px; font-weight: 400; text-transform: uppercase; letter-spacing: .02em; color: var(--label2); margin: 24px 16px 6px; }
 .sub { color: var(--label2); font-size: 15px; line-height: 20px; margin: 0 0 16px; }
-.logo { height: 64px; width: auto; display: block; margin: 28px auto 18px; }
-.logo-sm { height: 30px; width: auto; display: block; }
+.logo { height: 64px; width: auto; display: block; margin: 0 auto 18px; }
+.logo-sm { height: 34px; width: auto; display: block; flex: none; }
+#s-login.on { display: flex; min-height: 100dvh; align-items: center; justify-content: center; padding: 24px 16px; }
+.login-card { background: var(--card); border-radius: var(--r-xl); padding: 36px 24px 28px; max-width: 420px; width: 100%; text-align: center; box-shadow: var(--shadow-elev); }
+.login-card h1 { font-size: 22px; line-height: 28px; font-weight: 600; margin: 0 0 8px; letter-spacing: -.35px; }
+.login-card .sub { margin: 0 0 24px; }
+.login-card .o { font-size: 13px; line-height: 18px; color: var(--label3); margin: 22px 0 10px; }
+.login-card .campo { text-align: left; background: var(--bg); border-radius: 12px; padding: 8px 14px; margin-bottom: 8px; }
+.login-card .campo label { display: block; font-size: 12px; line-height: 16px; color: var(--label2); }
+.login-card .campo input { width: 100%; border: 0; outline: 0; background: transparent; padding: 2px 0 4px; }
+.login-card .err { margin: 12px 0 0; background: var(--red-bg); color: var(--red); border-radius: var(--r-sm); padding: 10px 12px; font-weight: 600; }
+.login-card .err:empty { display: none; }
 
 .group { background: var(--card); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
 .row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-height: 52px; width: 100%; text-align: left; background: none; border: 0; cursor: pointer; position: relative; }
@@ -90,14 +116,14 @@ h2 { font-size: 13px; line-height: 18px; font-weight: 400; text-transform: upper
 .foto .n { position: absolute; left: 6px; bottom: 6px; font-size: 12px; font-weight: 600; color: #fff; background: rgba(0,0,0,.5); border-radius: 99px; padding: 1px 7px; }
 .vacio { color: var(--label2); text-align: center; padding: 22px 12px; font-size: 15px; }
 
-.bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg) 78%, transparent); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); display: none; }
+.bar { position: fixed; z-index: 25; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg) 78%, transparent); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); display: none; }
 .bar.on { display: block; }
 .bar .in { max-width: 640px; margin: 0 auto; display: grid; gap: 10px; }
 .bar .in.two { grid-template-columns: 1fr 1fr; }
 
 .search { width: 100%; border: 0; outline: 0; background: var(--fill); border-radius: 12px; padding: 11px 14px; margin: 4px 0 14px; }
 
-#toast { position: fixed; left: 16px; right: 16px; top: calc(10px + env(safe-area-inset-top)); max-width: 608px; margin: 0 auto; background: rgba(35,38,28,.95); color: #fff; padding: 12px 16px; border-radius: 14px; font-size: 15px; display: none; align-items: center; justify-content: space-between; gap: 12px; z-index: 30; box-shadow: var(--shadow); }
+#toast { z-index: 30; position: fixed; left: 16px; right: 16px; top: calc(10px + env(safe-area-inset-top)); max-width: 608px; margin: 0 auto; background: rgba(35,38,28,.95); color: #fff; padding: 12px 16px; border-radius: 14px; font-size: 15px; display: none; align-items: center; justify-content: space-between; gap: 12px; z-index: 30; box-shadow: var(--shadow); }
 #toast.on { display: flex; animation: in .3s var(--ease); }
 #toast button { background: none; border: 0; color: var(--brand); font-weight: 600; cursor: pointer; }
 
@@ -122,24 +148,27 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 
 <!-- ============ Login ============ -->
 <section id="s-login" class="screen">
-  <img class="logo" src="logo-gh.png" alt="GH Consultora">
-  <h1 class="center">Auditoría de campo</h1>
-  <p class="sub center">Entrá con tu cuenta de GH Consultora. Solo hace falta la primera vez: la sesión dura 30 días.</p>
-  <div id="gsi" style="min-height:44px;display:flex;justify-content:center"></div>
-  <div class="err" id="login-err"></div>
-  <h2>Si el botón de Google no funciona</h2>
-  <div class="group" style="padding:4px 16px 12px">
-    <div class="field" style="box-shadow:none;padding:8px 0;border-bottom:.5px solid var(--sep);border-radius:0"><label for="l-mail">Tu mail de GH</label><input id="l-mail" type="email" inputmode="email" autocapitalize="none" autocomplete="username" placeholder="Tu mail"></div>
-    <div class="field" style="box-shadow:none;padding:8px 0;border-radius:0"><label for="l-cod">Código de acceso</label><input id="l-cod" type="text" autocapitalize="characters" autocomplete="off" placeholder="Código de acceso"></div>
+  <div class="login-card">
+    <img class="logo" src="logo-gh.png" alt="GH Consultora">
+    <h1>Auditoría de campo</h1>
+    <p class="sub">GH Consultora · Gestión Ambiental<br>Iniciá sesión con una cuenta de Google autorizada. Solo hace falta la primera vez: la sesión dura 30 días.</p>
+    <div id="gsi" style="min-height:44px;display:flex;justify-content:center"></div>
+    <div class="err" id="login-err"></div>
+    <p class="o">¿No te funciona el botón de Google? Entrá con tu código.</p>
+    <div class="campo"><label for="l-mail">Tu mail de GH</label><input id="l-mail" type="email" inputmode="email" autocapitalize="none" autocomplete="username" placeholder="Mail"></div>
+    <div class="campo"><label for="l-cod">Código de acceso</label><input id="l-cod" type="text" autocapitalize="characters" autocomplete="off" placeholder="Código"></div>
+    <div class="btns" style="margin-top:12px"><button class="btn tint" id="l-go">Entrar con código</button></div>
   </div>
-  <div class="btns"><button class="btn sec" id="l-go">Entrar con código</button></div>
 </section>
 
 <!-- ============ Inicio ============ -->
 <section id="s-home" class="screen">
-  <div class="top"><img class="logo-sm" src="logo-gh.png" alt="GH Consultora"><span style="display:flex;align-items:center;gap:14px"><span class="quien" id="h-quien"></span><button class="back" id="h-salir" style="color:var(--label2);font-size:15px">Salir</button></span></div>
+  <div class="top">
+    <div class="brand"><img class="logo-sm" src="logo-gh.png" alt="GH Consultora"><div><div class="t1">Auditoría de campo</div><div class="t2">GH Consultora · Gestión Ambiental</div></div></div>
+    <div class="cuenta"><b id="h-quien"></b><button id="h-salir">Salir</button></div>
+  </div>
   <h1>Auditorías</h1>
-  <p class="sub">Cada sector se guarda apenas lo terminás. Si se corta algo, no perdés nada.</p>
+  <p class="sub"><span id="h-hola"></span>Cada sector se guarda apenas lo terminás. Si se corta algo, no perdés nada.</p>
   <div id="h-retomar"></div>
   <div class="btns"><button class="btn" id="h-nueva"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva visita</button></div>
   <p class="hint" id="h-ayuda"></p>
@@ -300,7 +329,7 @@ $('h-salir').onclick = async () => { if (await confirmar('¿Salir?', visita ? 'T
 function nSectoresGuardados(v) { return v.sectores.filter((s) => s.vSubido === s.v).length; }
 function pintarHome() {
   ir('home');
-  $('h-quien').textContent = sesion.nombre;
+  $('h-quien').textContent = sesion.nombre; $('h-hola').textContent = 'Hola, ' + sesion.nombre.split(' ')[0] + '. ';
   const r = $('h-retomar');
   if (visita) {
     const n = visita.sectores.length;
