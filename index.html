@@ -73,11 +73,15 @@ h2 { font-size: 13px; line-height: 18px; font-weight: 400; text-transform: upper
 .sub { color: var(--label2); font-size: 15px; line-height: 20px; margin: 0 0 16px; }
 .logo { height: 64px; width: auto; display: block; margin: 0 auto 18px; }
 .logo-sm { height: 34px; width: auto; display: block; flex: none; }
+#gsi { color-scheme: light; }
 #s-login.on { display: flex; min-height: 100dvh; align-items: center; justify-content: center; padding: 24px 16px; }
 .login-card { background: var(--card); border-radius: var(--r-xl); padding: 36px 24px 28px; max-width: 420px; width: 100%; text-align: center; box-shadow: var(--shadow-elev); }
 .login-card h1 { font-size: 22px; line-height: 28px; font-weight: 600; margin: 0 0 8px; letter-spacing: -.35px; }
 .login-card .sub { margin: 0 0 24px; }
-.login-card .o { font-size: 13px; line-height: 18px; color: var(--label3); margin: 22px 0 10px; }
+.login-card .codigo { margin-top: 20px; text-align: left; }
+.login-card .codigo summary { list-style: none; cursor: pointer; text-align: center; font-size: 13px; line-height: 18px; color: var(--label2); padding: 8px 0; }
+.login-card .codigo summary::-webkit-details-marker { display: none; }
+.login-card .codigo[open] summary { margin-bottom: 8px; }
 .login-card .campo { text-align: left; background: var(--bg); border-radius: 12px; padding: 8px 14px; margin-bottom: 8px; }
 .login-card .campo label { display: block; font-size: 12px; line-height: 16px; color: var(--label2); }
 .login-card .campo input { width: 100%; border: 0; outline: 0; background: transparent; padding: 2px 0 4px; }
@@ -176,13 +180,15 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   <div class="login-card">
     <img class="logo" src="logo-gh.png" alt="GH Consultora">
     <h1>Auditoría de campo</h1>
-    <p class="sub">GH Consultora · Gestión Ambiental<br>Iniciá sesión con una cuenta de Google autorizada. Solo hace falta la primera vez: la sesión dura 30 días.</p>
+    <p class="sub">GH Consultora · Gestión Ambiental<br>Iniciá sesión con una cuenta de Google autorizada para cargar tus visitas.</p>
     <div id="gsi" style="min-height:44px;display:flex;justify-content:center"></div>
     <div class="err" id="login-err"></div>
-    <p class="o">¿No te funciona el botón de Google? Entrá con tu código.</p>
-    <div class="campo"><label for="l-mail">Tu mail de GH</label><input id="l-mail" type="email" inputmode="email" autocapitalize="none" autocomplete="username" placeholder="Mail"></div>
-    <div class="campo"><label for="l-cod">Código de acceso</label><input id="l-cod" type="text" autocapitalize="characters" autocomplete="off" placeholder="Código"></div>
-    <div class="btns" style="margin-top:12px"><button class="btn tint" id="l-go">Entrar con código</button></div>
+    <details class="codigo">
+      <summary>¿No te funciona el botón? Entrá con tu código</summary>
+      <div class="campo"><label for="l-mail">Tu mail de GH</label><input id="l-mail" type="email" inputmode="email" autocapitalize="none" autocomplete="username" placeholder="Mail"></div>
+      <div class="campo"><label for="l-cod">Código de acceso</label><input id="l-cod" type="text" autocapitalize="characters" autocomplete="off" placeholder="Código"></div>
+      <div class="btns" style="margin-top:12px"><button class="btn tint" id="l-go">Entrar con código</button></div>
+    </details>
   </div>
 </section>
 
