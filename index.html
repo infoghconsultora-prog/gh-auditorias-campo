@@ -99,6 +99,8 @@ h2 { font-size: 13px; line-height: 18px; font-weight: 400; text-transform: upper
 
 .chip { font-size: 12px; line-height: 16px; padding: 2px 8px; border-radius: 99px; background: var(--fill); color: var(--label2); white-space: nowrap; }
 .chip.ok { background: var(--verde-bg); color: var(--verde); font-weight: 600; }
+.chip.sub { background: var(--accent-soft); color: var(--accent); font-weight: 600; display: inline-flex; align-items: center; }
+.chip.sub .spin { width: 10px; height: 10px; border-width: 1.5px; margin-right: 5px; vertical-align: 0; }
 .chip.warn { background: var(--naranja-bg); color: var(--naranja); font-weight: 600; }
 
 .btn { display: block; width: 100%; border: 0; border-radius: 14px; padding: 15px 16px; font-size: 17px; font-weight: 600; background: var(--accent); color: var(--accent-ink); cursor: pointer; text-align: center; transition: transform .2s var(--ease), opacity .2s; }
@@ -318,10 +320,11 @@ const sinRed = (e) => /fetch|network|load failed|failed to/i.test(String(e && e.
 
 /* ---------- pantallas ---------- */
 function ir(nombre) {
+  const ya = $('s-' + nombre).classList.contains('on'); // repintar en segundo plano no debe mover la pantalla
   document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('on', s.id === 's-' + nombre));
   $('bar-visita').classList.toggle('on', nombre === 'visita');
   $('bar-sector').classList.toggle('on', nombre === 'sector');
-  window.scrollTo(0, 0);
+  if (!ya) window.scrollTo(0, 0);
 }
 let toastT;
 function toast(msg, accion, fn) {
@@ -403,21 +406,33 @@ function listarEmpresas() {
 $('e-buscar').oninput = listarEmpresas;
 $('e-volver').onclick = pintarHome;
 async function nuevaVisita(empresa) {
-  visita = { id: uid(), empresa, creada: Date.now(), sectores: [] };
+  visita = { id: uid(), empresa, creada: Date.now(), fmt: 2, sectores: [] };
   await guardarVisita(); pintarVisita();
 }
 
 /* ---------- visita: lista de sectores ---------- */
-function estadoSector(s) { return s.vSubido === s.v ? ['ok', 'Guardado'] : (s.vSubido ? ['warn', 'Cambios sin enviar'] : ['warn', 'Sin enviar']); }
+const completo = (s) => !!s.nombre.trim() && (!!s.texto.trim() || s.fotos.length > 0);
+function estadoSector(s) {
+  if (enSubida.has(s.id)) return ['sub', '<span class="spin"></span>Subiendo…'];
+  if (enCola.includes(s)) return ['sub', '<span class="spin"></span>En cola'];
+  if (s.vSubido === s.v) return ['ok', 'Guardado'];
+  if (!completo(s)) return ['warn', 'Incompleto'];
+  const f = fallo.get(s.id);
+  return ['warn', f === 'red' ? 'Sin conexión' : (f ? 'No se pudo enviar' : (s.vSubido ? 'Cambios sin enviar' : 'Sin enviar'))];
+}
+const hayPendientes = () => !!visita && visita.sectores.some((s) => s.vSubido !== s.v && completo(s));
+const subiendoAlgo = () => enSubida.size > 0 || enCola.length > 0;
 function pintarVisita() {
   ir('visita');
   $('v-empresa').textContent = visita.empresa;
   const n = visita.sectores.length;
-  $('v-sub').textContent = n ? `${n} sector${n === 1 ? '' : 'es'}. Tocá uno para editarlo.` : 'Empezá agregando el primer sector.';
+  const k = enSubida.size + enCola.length;
+  $('v-sub').textContent = !n ? 'Empezá agregando el primer sector.' : (k ? `Subiendo ${k} sector${k === 1 ? '' : 'es'} en segundo plano. Podés seguir con el próximo.` : `${n} sector${n === 1 ? '' : 'es'}. Tocá uno para editarlo.`);
   $('v-lista').innerHTML = n ? '<div class="group">' + visita.sectores.map((s, i) => {
     const [cls, txt] = estadoSector(s);
     return `<button class="row" data-i="${i}"><div class="t"><b>${i + 1}. ${esc(s.nombre || 'Sin nombre')}</b><span>${s.fotos.length} foto${s.fotos.length === 1 ? '' : 's'}${s.texto ? ' · ' + esc(s.texto.slice(0, 40)) + (s.texto.length > 40 ? '…' : '') : ''}</span></div><span class="chip ${cls}">${txt}</span>${I.chev}</button>`;
-  }).join('') + '</div>' : '';
+  }).join('') + '</div>' + (hayPendientes() && !subiendoAlgo() ? '<div class="btns"><button class="btn tint" id="v-reint">Reintentar el envío</button></div>' : '') : '';
+  if ($('v-reint')) $('v-reint').onclick = () => { reintentarPendientes(); toast('Reintentando…'); };
   $('v-lista').querySelectorAll('.row').forEach((b) => b.onclick = () => abrirSector(visita.sectores[+b.dataset.i]));
   $('v-terminar').disabled = !n;
 }
@@ -436,15 +451,15 @@ function abrirSector(s) {
   pintarFotos(); pintarEstado();
   autoalto();
 }
-function pintarEstado() { const [cls, txt] = estadoSector(sectorActual); const c = $('x-estado'); c.className = 'chip ' + cls; c.textContent = txt; }
+function pintarEstado() { const [cls, txt] = estadoSector(sectorActual); const c = $('x-estado'); c.className = 'chip ' + cls; c.innerHTML = txt; }
 function autoalto() { const t = $('x-texto'); t.style.height = 'auto'; t.style.height = Math.max(170, t.scrollHeight) + 'px'; }
 function pintarFotos() {
   urls.forEach(URL.revokeObjectURL); urls = [];
   const f = sectorActual.fotos;
   $('x-cant').textContent = f.length ? '(' + f.length + ')' : '';
-  $('x-fotos').innerHTML = f.length ? f.map((p, i) => { const u = URL.createObjectURL(p.blob); urls.push(u); return `<div class="foto"><img src="${u}" data-i="${i}" alt="Foto ${i + 1}"><span class="n">${i + 1}</span><button class="x" data-q="${i}" aria-label="Quitar foto ${i + 1}">${I.x}</button></div>`; }).join('') : '';
+  $('x-fotos').innerHTML = f.length ? f.map((p, i) => { const u = URL.createObjectURL(p.thumb || p.blob); urls.push(u); return `<div class="foto"><img src="${u}" data-i="${i}" alt="Foto ${i + 1}"><span class="n">${i + 1}</span><button class="x" data-q="${i}" aria-label="Quitar foto ${i + 1}">${I.x}</button></div>`; }).join('') : '';
   if (!f.length) $('x-fotos').innerHTML = '<div class="vacio" style="grid-column:1/-1">Todavía no hay fotos de este sector.</div>';
-  $('x-fotos').querySelectorAll('img').forEach((im) => im.onclick = () => { $('visor-img').src = im.src; $('visor').classList.add('on'); });
+  $('x-fotos').querySelectorAll('img').forEach((im) => im.onclick = () => { const p = sectorActual.fotos[+im.dataset.i]; $('visor-img').src = p && p.blob ? URL.createObjectURL(p.blob) : im.src; $('visor').classList.add('on'); });
   $('x-fotos').querySelectorAll('.x').forEach((b) => b.onclick = () => quitarFoto(+b.dataset.q));
 }
 $('visor').onclick = () => $('visor').classList.remove('on');
@@ -463,7 +478,7 @@ $('x-gal').onclick = () => $('in-gal').click();
   if (!files.length) return;
   $('x-err').textContent = '';
   for (const f of files) {
-    try { sectorActual.fotos.push({ id: uid(), blob: await comprimir(f) }); marcarCambio(); pintarFotos(); }
+    try { const blob = await comprimir(f); sectorActual.fotos.push({ id: uid(), blob, thumb: await hacerThumb(blob), remota: false }); marcarCambio(); pintarFotos(); }
     catch (err) { $('x-err').textContent = 'No se pudo leer una de las fotos.'; }
   }
   await guardarVisita();
@@ -480,11 +495,17 @@ async function comprimir(file) {
   if (!blob || !blob.size) throw new Error('foto_vacia');
   return blob;
 }
+async function hacerThumb(blob) {
+  const bmp = await createImageBitmap(blob), k = Math.min(1, 360 / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); if (bmp.close) bmp.close();
+  return await new Promise((res) => c.toBlob(res, 'image/jpeg', 0.7));
+}
 $('x-volver').onclick = async () => {
   const s = sectorActual;
   if (s.nuevo && !s.nombre && !s.texto && !s.fotos.length) visita.sectores = visita.sectores.filter((x) => x !== s); // sector vacío: no se guarda
   await guardarVisita(); pintarVisita();
-  subirPendientes(true);
+  reintentarPendientes();
 };
 $('x-borrar').onclick = async () => {
   if (!(await confirmar('¿Eliminar este sector?', 'Se borran sus notas y fotos.', 'Eliminar', true))) return;
@@ -495,42 +516,61 @@ $('x-guardar').onclick = async () => {
   if (!s.nombre.trim()) { $('x-err').textContent = 'Ponele un nombre al sector.'; $('x-nombre').focus(); return; }
   if (!s.texto.trim() && !s.fotos.length) { $('x-err').textContent = 'Agregá notas o al menos una foto.'; return; }
   s.nuevo = false; await guardarVisita();
-  const b = $('x-guardar'); b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
-  const r = await subirSector(s);
-  b.disabled = false; b.textContent = 'Guardar sector';
-  if (r === true) { pintarVisita(); toast('Sector guardado'); }
-  else { pintarVisita(); toast(r === 'red' ? 'Sin conexión: queda en el teléfono y se envía cuando haya señal.' : 'No se pudo enviar: ' + r); }
+  pintarVisita(); encolar(s);               // vuelve al instante; la subida sigue en segundo plano
+  toast('Sector guardado. Se sube solo; podés seguir.');
 };
 
-/* ---------- envío al servidor (sector por sector) ---------- */
+/* ---------- envío al servidor: en segundo plano, sector por sector ---------- */
 const b64 = (blob) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); });
-let subiendo = Promise.resolve();
-function subirSector(s) { // se encadenan: nunca dos subidas a la vez
-  const t = subiendo.then(() => subirSectorYa(s)); subiendo = t.catch(() => {}); return t;
+const enSubida = new Set();   // sectores subiéndose ahora (solo en memoria)
+const enCola = [];            // sectores esperando su turno
+const fallo = new Map();      // id de sector -> último error
+let trabajando = false;
+const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+function repintar() {
+  if ($('s-visita').classList.contains('on')) pintarVisita();
+  else if ($('s-sector').classList.contains('on') && sectorActual) pintarEstado();
+  else if ($('s-home').classList.contains('on')) pintarHome();
+}
+function encolar(s) { if (!enCola.includes(s) && !enSubida.has(s.id)) enCola.push(s); repintar(); procesarCola(); }
+function reintentarPendientes() { if (!visita || !sesion) return; visita.sectores.filter((s) => s.vSubido !== s.v && completo(s)).forEach((s) => { if (!enCola.includes(s) && !enSubida.has(s.id)) enCola.push(s); }); repintar(); procesarCola(); }
+async function procesarCola() {
+  if (trabajando) return; trabajando = true;
+  try {
+    while (enCola.length) {
+      const s = enCola.shift();
+      if (!visita || !visita.sectores.includes(s) || s.vSubido === s.v) continue;
+      enSubida.add(s.id); repintar();
+      const r = await subirSectorYa(s);
+      enSubida.delete(s.id);
+      if (r === true) { fallo.delete(s.id); if (s.vSubido !== s.v && completo(s)) enCola.push(s); } // lo tocaron mientras subía
+      else { fallo.set(s.id, r); if (r === 'red') { enCola.length = 0; } }                           // sin señal: se corta y se reintenta solo
+      repintar();
+    }
+  } finally { trabajando = false; repintar(); }
 }
 async function subirSectorYa(s) {
-  if (!visita || !visita.sectores.includes(s)) return true;
-  const v = s.v;
+  const v = s.v, nuevas = s.fotos.filter((p) => !p.remota && p.blob);
   try {
-    const fotos = [];
-    for (const p of s.fotos) fotos.push({ base64: await b64(p.blob), mime: 'image/jpeg' });
-    const j = await conSesion({ action: 'campo_sector', visitaId: visita.id, empresa: visita.empresa, sectorId: s.id, nombre: s.nombre, texto: s.texto, fotos });
-    if (!j.ok) return j.error + (j.recibido ? ' (' + j.recibido + ')' : '');
-    s.vSubido = v; await guardarVisita(); return true;
+    const envio = []; for (const p of nuevas) envio.push({ id: p.id, base64: await b64(p.blob), mime: 'image/jpeg' });
+    const j = await conSesion({ action: 'campo_sector', visitaId: visita.id, empresa: visita.empresa, sectorId: s.id, nombre: s.nombre, texto: s.texto, orden: s.fotos.map((p) => p.id), nuevas: envio });
+    if (!j.ok) {
+      if (j.error === 'foto_faltante') { // el servidor no tiene una foto que dábamos por subida
+        const ids = String(j.recibido || '').split(', ');
+        s.fotos = s.fotos.filter((p) => { if (!ids.includes(p.id)) return true; if (p.blob) { p.remota = false; return true; } return false; });
+        s.v++; await guardarVisita();
+      }
+      return j.error + (j.recibido ? ' (' + j.recibido + ')' : '');
+    }
+    s.vSubido = v;
+    for (const p of nuevas) { if (!p.thumb) p.thumb = await hacerThumb(p.blob); p.remota = true; p.blob = null; } // ya está en el servidor: sale de la memoria del teléfono
+    await guardarVisita(); return true;
   } catch (e) { return sinRed(e) ? 'red' : e.message; }
 }
-async function subirPendientes(silencioso) {
-  if (!visita || !sesion) return true;
-  let ok = true;
-  for (const s of [...visita.sectores]) {
-    if (s.vSubido === s.v || (s.nuevo && !s.nombre && !s.texto && !s.fotos.length)) continue;
-    if (!s.nombre.trim() || (!s.texto.trim() && !s.fotos.length)) continue; // incompleto: no se envía
-    const r = await subirSector(s); if (r !== true) ok = false;
-  }
-  if ($('s-visita').classList.contains('on')) pintarVisita();
-  return ok;
-}
-window.addEventListener('online', () => subirPendientes(true));
+async function esperarSubidas() { reintentarPendientes(); while (trabajando || enCola.length) await dormir(200); return !hayPendientes(); }
+window.addEventListener('online', reintentarPendientes);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) reintentarPendientes(); });
+setInterval(() => { if (hayPendientes() && !trabajando) reintentarPendientes(); }, 30000);
 
 /* ---------- terminar ---------- */
 $('v-terminar').onclick = async () => {
@@ -544,7 +584,9 @@ $('v-terminar').onclick = async () => {
   if (!(await confirmar('¿Terminar la visita?', `Se procesan ${n} sector${n === 1 ? '' : 'es'} y ${fotos} foto${fotos === 1 ? '' : 's'}, y te llega el borrador por mail.`, 'Terminar y enviar'))) return;
   const b = $('v-terminar'); b.disabled = true; b.innerHTML = '<span class="spin"></span>Enviando…';
   try {
-    if (!(await subirPendientes())) { $('v-err').textContent = 'No se pudieron enviar todos los sectores. Revisá la conexión y probá de nuevo.'; return; }
+    if (subiendoAlgo()) b.innerHTML = '<span class="spin"></span>Terminando de subir…';
+    if (!(await esperarSubidas())) { $('v-err').textContent = 'No se pudieron enviar todos los sectores. Revisá la conexión y probá de nuevo.'; return; }
+    b.innerHTML = '<span class="spin"></span>Enviando…';
     const j = await conSesion({ action: 'campo_finalizar', visitaId: visita.id, orden: visita.sectores.map((s) => s.id) });
     if (!j.ok) { $('v-err').textContent = 'No se pudo terminar: ' + j.error + (j.recibido ? ' (' + j.recibido + ')' : ''); return; }
     $('f-msg').textContent = j.mensaje; visita = null; await guardarVisita(); ir('fin');
@@ -557,9 +599,12 @@ $('f-home').onclick = pintarHome;
 async function iniciar() {
   if (!sesion) return mostrarLogin();
   visita = (await dbGet('visita')) || null;
+  if (visita && visita.fmt !== 2) { // visita guardada con la versión anterior: se vuelve a subir en el formato nuevo
+    visita.fmt = 2; visita.sectores.forEach((s) => { s.vSubido = 0; s.fotos.forEach((p) => { p.remota = false; }); }); await guardarVisita();
+  } else if (visita) { for (const s of visita.sectores) for (const p of s.fotos) if (!p.thumb && p.blob) { try { p.thumb = await hacerThumb(p.blob); } catch (e) {} } }
   pintarHome();
   cargarEmpresas();
-  subirPendientes(true);
+  reintentarPendientes();
 }
 (async function () {
   try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
