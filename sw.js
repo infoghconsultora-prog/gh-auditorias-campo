@@ -1,6 +1,6 @@
 // Service worker mínimo: guarda la "cáscara" de la app para que abra sin señal.
 // Las llamadas al backend (script.google.com) nunca se cachean.
-const V = 'gh-campo-v2';
+const V = 'gh-campo-v3';
 const CASCARA = ['./', 'index.html', 'manifest.webmanifest', 'logo-gh.png', 'icon-192.png', 'apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(V).then((c) => c.addAll(CASCARA)).then(() => self.skipWaiting())); });
