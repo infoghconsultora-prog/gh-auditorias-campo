@@ -2,14 +2,31 @@
   "name": "Auditoría de campo — GH Consultora",
   "short_name": "Auditoría",
   "description": "Carga de visitas de auditoría ambiental, sector por sector.",
+  "lang": "es-AR",
+  "id": "/gh-auditorias-campo/",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f7f8f4",
   "theme_color": "#f7f8f4",
-  "lang": "es",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
