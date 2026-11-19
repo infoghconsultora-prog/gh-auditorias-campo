@@ -1,4 +1,4 @@
-# Auditoría de campo (PWA)
+# Auditorías Ambientales (PWA)
 
 App web de GH Consultora para cargar una visita de auditoría ambiental **sector por sector**
 (nombre, notas escritas/dictadas con el teclado, fotos de cámara o galería con selección múltiple).

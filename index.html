@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Auditoría de campo — GH Consultora</title>
+<title>Auditorías Ambientales — GH Consultora</title>
 <meta name="theme-color" content="#f7f8f4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14170f" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Auditoría">
+<meta name="apple-mobile-web-app-title" content="Auditorías">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
@@ -242,7 +242,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 <section id="s-login" class="screen gh-login">
   <div class="gh-login-card">
     <img class="gh-login-logo" src="logo-gh.png" alt="GH Consultora">
-    <h1>Auditoría de campo</h1>
+    <h1>Auditorías Ambientales</h1>
     <p class="sub">GH Consultora · Gestión Ambiental<br>Iniciá sesión con una cuenta de Google autorizada para cargar tus visitas.</p>
     <div id="gsi" style="min-height:44px;display:flex;justify-content:center"></div>
     <div class="err" id="login-err"></div>
@@ -258,7 +258,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 <!-- ============ Inicio ============ -->
 <section id="s-home" class="screen">
   <div class="top">
-    <div class="brand"><img class="logo-sm" src="logo-gh.png" alt="GH Consultora"><div><div class="t1">Auditoría de campo</div><div class="t2">GH Consultora · Gestión Ambiental</div></div></div>
+    <div class="brand"><img class="logo-sm" src="logo-gh.png" alt="GH Consultora"><div><div class="t1">Auditorías Ambientales</div><div class="t2">GH Consultora · Gestión Ambiental</div></div></div>
     <div class="cuenta"><b id="h-quien"></b><button id="h-salir">Salir</button></div>
   </div>
   <h1>Auditorías</h1>
@@ -640,7 +640,7 @@ $('v-terminar').onclick = async () => {
   if (incompletos.length) { $('v-err').textContent = 'Hay sectores sin nombre o vacíos: completalos o eliminalos antes de terminar.'; return; }
   const fotos = visita.sectores.reduce((a, s) => a + s.fotos.length, 0);
   if (!fotos) { $('v-err').textContent = 'La visita necesita al menos una foto.'; return; }
-  if (fotos > 40) { $('v-err').textContent = `Hay ${fotos} fotos y el máximo por visita es 40. Quitá algunas.`; return; }
+  if (fotos > 60) { $('v-err').textContent = `Hay ${fotos} fotos y el máximo por visita es 60. Quitá algunas.`; return; }
   const n = visita.sectores.length;
   if (!(await confirmar('¿Terminar la visita?', `Se procesan ${n} sector${n === 1 ? '' : 'es'} y ${fotos} foto${fotos === 1 ? '' : 's'}, y te llega el borrador por mail.`, 'Terminar y enviar'))) return;
   const b = $('v-terminar'); b.disabled = true; b.innerHTML = '<span class="spin"></span>Enviando…';
