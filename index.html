@@ -477,7 +477,7 @@ const ESTADOS = {
   generando: ['sub', '<span class="spin"></span>Generando', 'El borrador se está generando. Te va a llegar un mail cuando esté listo.'],
   demorada: ['warn', 'Demorada', 'El borrador está demorado. El sistema lo sigue intentando solo.'],
   borrador: ['nueva', 'Sin Word', 'Esta auditoría todavía no tiene su Word. Desde el borrador: Archivo > Descargar > Microsoft Word.'],
-  aprobada: ['ok', 'En Word', 'El informe está en Word, en la carpeta de informes de la empresa. Corregilo sobre ese mismo archivo.'],
+  aprobada: ['ok', 'En Word', 'El Word está en la carpeta de informes de la empresa. Corregilo y guardalo como informe final ahí mismo.'],
   sin_borrador: ['warn', 'Sin borrador', 'No hay un borrador registrado para esta visita.']
 };
 const ERRORES = {
@@ -507,7 +507,7 @@ function pintarAuditoria() {
   $('a-estado').className = 'chip ' + cls; $('a-estado').innerHTML = txt;
   $('a-empresa').textContent = a.empresa; $('a-sub').textContent = a.fecha + (a.tecnico ? ' · ' + a.tecnico : '');
   // el Word se abre en el editor de Google Docs (se puede corregir ahí o en Word); el documento intermedio solo si no hay Word
-  $('a-informe').innerHTML = a.finalUrl ? enlace(a.finalUrl.replace('https://drive.google.com/file/d/', 'https://docs.google.com/document/d/').replace(/\/view$/, '/edit'), 'Abrir informe (Word)', '')
+  $('a-informe').innerHTML = a.finalUrl ? enlace(a.finalUrl.replace('https://drive.google.com/file/d/', 'https://docs.google.com/document/d/').replace(/\/view$/, '/edit'), 'Abrir el Word', '')
     : (a.docUrl ? enlace(a.docUrl, 'Abrir el borrador', 'sec') : '');
   $('a-informe-ayuda').textContent = ayuda;
   const listo = (a.docUrl || a.finalUrl) && a.estado !== 'generando' && a.estado !== 'demorada';
