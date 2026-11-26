@@ -274,7 +274,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 <section id="s-hist" class="screen">
   <div class="top"><button class="back" id="t-volver"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Inicio</button></div>
   <h1>Historial</h1>
-  <p class="sub">Tocá una auditoría para abrir el borrador, aprobarla o borrar sus archivos auxiliares.</p>
+  <p class="sub">Tocá una auditoría para abrir su informe en Word o borrar sus archivos auxiliares.</p>
   <input class="search" id="t-buscar" type="search" placeholder="Buscar empresa o técnico" autocomplete="off">
   <div id="t-lista"></div>
   <div class="err" id="t-err"></div>
@@ -476,12 +476,11 @@ $('h-nueva').onclick = async () => {
 const ESTADOS = {
   generando: ['sub', '<span class="spin"></span>Generando', 'El borrador se está generando. Te va a llegar un mail cuando esté listo.'],
   demorada: ['warn', 'Demorada', 'El borrador está demorado. El sistema lo sigue intentando solo.'],
-  borrador: ['nueva', 'Para revisar', 'Revisá el borrador y, cuando esté bien, aprobalo para generar el Word final.'],
-  aprobada: ['ok', 'Aprobada', 'El informe final está en la carpeta de la empresa. Si corregís el borrador, podés generarlo de nuevo: se guarda otro archivo y el anterior queda.'],
+  borrador: ['nueva', 'Sin Word', 'Esta auditoría todavía no tiene su Word. Desde el borrador: Archivo > Descargar > Microsoft Word.'],
+  aprobada: ['ok', 'En Word', 'El informe está en Word, en la carpeta de informes de la empresa. Corregilo sobre ese mismo archivo.'],
   sin_borrador: ['warn', 'Sin borrador', 'No hay un borrador registrado para esta visita.']
 };
 const ERRORES = {
-  borrador_no_encontrado: 'No se encontró el borrador en Drive.', no_se_pudo_exportar: 'No se pudo generar el Word. Abrí el borrador y usá Archivo > Descargar > Word.',
   sin_informe: 'No se encontró el informe, así que no se borra nada.', en_proceso: 'El borrador todavía se está generando.', auditoria_desconocida: 'No se encontró esa auditoría.'
 };
 let historial = [], auditoria = null, ocupado = false;
@@ -507,18 +506,15 @@ function pintarAuditoria() {
   ir('aud');
   $('a-estado').className = 'chip ' + cls; $('a-estado').innerHTML = txt;
   $('a-empresa').textContent = a.empresa; $('a-sub').textContent = a.fecha + (a.tecnico ? ' · ' + a.tecnico : '');
-  let h = '';
-  if (a.finalUrl) h += enlace(a.finalUrl, 'Abrir informe final (Word)', '');
-  if (a.docUrl) h += enlace(a.docUrl, 'Abrir el borrador', 'sec');
-  if (a.docUrl && a.estado === 'borrador') h += '<button class="btn" id="a-aprobar">Aprobar y generar informe final</button>';
-  if (a.docUrl && a.estado === 'aprobada') h += '<button class="btn tint" id="a-aprobar">Generar el Word de nuevo</button>';
-  $('a-informe').innerHTML = h; $('a-informe-ayuda').textContent = ayuda;
+  // el Word se abre en el editor de Google Docs (se puede corregir ahí o en Word); el documento intermedio solo si no hay Word
+  $('a-informe').innerHTML = a.finalUrl ? enlace(a.finalUrl.replace('https://drive.google.com/file/d/', 'https://docs.google.com/document/d/').replace(/\/view$/, '/edit'), 'Abrir informe (Word)', '')
+    : (a.docUrl ? enlace(a.docUrl, 'Abrir el borrador', 'sec') : '');
+  $('a-informe-ayuda').textContent = ayuda;
   const listo = (a.docUrl || a.finalUrl) && a.estado !== 'generando' && a.estado !== 'demorada';
   $('a-aux').innerHTML = !a.auxBorrados && listo ? '<button class="btn danger" id="a-borrar">Borrar archivos auxiliares</button>' : '';
   $('a-aux-ayuda').textContent = a.auxBorrados ? 'Las fotos y notas sueltas de esta visita ya se mandaron a la papelera. El borrador y el informe no se tocan.'
     : (listo ? `Son las fotos y notas sueltas; el informe ya las incluye. Si no los borrás, van solos a la papelera el ${a.limpiaEl} (a los 30 días). Desde la papelera de Drive se recuperan durante otros 30.`
       : 'Se pueden borrar cuando el informe esté listo.');
-  if ($('a-aprobar')) $('a-aprobar').onclick = aprobar;
   if ($('a-borrar')) $('a-borrar').onclick = borrarAuxiliares;
 }
 async function accionAuditoria(boton, esperando, cuerpo, alTerminar) {
@@ -534,11 +530,6 @@ async function accionAuditoria(boton, esperando, cuerpo, alTerminar) {
     boton.disabled = false; boton.innerHTML = antes;
     $('a-err').textContent = sinRed(e) ? 'Sin conexión. Probá de nuevo cuando tengas señal.' : e.message;
   } finally { ocupado = false; }
-}
-async function aprobar() {
-  const b = $('a-aprobar'), deNuevo = auditoria.estado === 'aprobada';
-  if (!(await confirmar(deNuevo ? '¿Generar el Word de nuevo?' : '¿Aprobar el informe?', 'Se guarda el Word en la carpeta de ' + auditoria.empresa + '. No se borra nada.', deNuevo ? 'Generar' : 'Aprobar'))) return;
-  accionAuditoria(b, 'Generando el Word…', { action: 'campo_aprobar', deNuevo }, (a, j) => { a.finalUrl = j.finalUrl; a.estado = 'aprobada'; toast('Informe final generado.'); });
 }
 async function borrarAuxiliares() {
   const b = $('a-borrar');
